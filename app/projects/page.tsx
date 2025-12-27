@@ -2,10 +2,9 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 type Project = {
-    id: string; // used as slug in URL
+    id: string;
     title: string;
     icon?: string;
     date: string;
@@ -55,12 +54,6 @@ function DrawerSection({
 }
 
 export default function ProjectsPage() {
-    const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
-
-    const projectFromUrl = searchParams.get("project"); // e.g. ?project=coursistant
-
     const projects: Project[] = useMemo(
         () => [
             {
@@ -71,8 +64,8 @@ export default function ProjectsPage() {
                 tags: ["Unity", "C#"],
                 summary:
                     "An independently built 2D educational game designed to help children understand county government responsibilities and community rules through interactive gameplay.",
-                cover: "/portfolio/rockdale-game.png",
-                media: ["/portfolio/rockdale-game.png"],
+                cover: "/cathymu-portfolio/rockdale-game.png",
+                media: ["/cathymu-portfolio/rockdale-game.png"],
                 sections: {
                     context: [
                         "Rockdale County wanted an engaging way to introduce local government roles and responsibilities to children in the community.",
@@ -100,8 +93,8 @@ export default function ProjectsPage() {
                 summary:
                     "A machine learning system that analyzes facial, acoustic, linguistic, and cardiovascular signals from video conversations to support early cognitive health screening.",
                 url: "https://iopscience.iop.org/article/10.1088/3049-477X/ae250c",
-                cover: "/portfolio/multimodal-paper.png",
-                media: ["/portfolio/multimodal-paper.png"],
+                cover: "/cathymu-portfolio/multimodal-paper.png",
+                media: ["/cathymu-portfolio/multimodal-paper.png"],
                 sections: {
                     context: [
                         "This project was part of a healthcare research collaboration exploring whether everyday remote conversations could be used for scalable cognitive health assessment.",
@@ -129,8 +122,8 @@ export default function ProjectsPage() {
                 summary:
                     "Production backend and analytics features for an AI-powered learning platform, focused on assignment workflows, data reliability, and product insights.",
                 url: "https://coursistant.com/",
-                cover: "/portfolio/coursistant.png",
-                media: ["/portfolio/coursistant.png"],
+                cover: "/cathymu-portfolio/coursistant.png",
+                media: ["/cathymu-portfolio/coursistant.png"],
                 sections: {
                     context: [
                         "Coursistant is an AI-powered education platform that relies on accurate data and reliable workflows to support learners and instructors.",
@@ -157,8 +150,8 @@ export default function ProjectsPage() {
                 tags: ["Python", "SQL", "Excel", "Tableau"],
                 summary:
                     "An automated analytics and dashboard system that replaced manual reporting for county code enforcement operations.",
-                cover: "/portfolio/rockdale-seal.png",
-                media: ["/portfolio/rockdale-seal.png"],
+                cover: "/cathymu-portfolio/rockdale-seal.png",
+                media: ["/cathymu-portfolio/rockdale-seal.png"],
                 sections: {
                     context: [
                         "County staff relied on manual data collection and reporting to track officer performance and regional incident trends.",
@@ -184,29 +177,48 @@ export default function ProjectsPage() {
     const [openId, setOpenId] = useState<string | null>(null);
     const active = projects.find((p) => p.id === openId) ?? null;
 
-    // ✅ open drawer if URL contains ?project=...
+    // ✅ On first load: if URL has ?project=..., open that drawer (client-only)
     useEffect(() => {
+        const sp = new URLSearchParams(window.location.search);
+        const projectFromUrl = sp.get("project");
         if (!projectFromUrl) return;
+
         const exists = projects.some((p) => p.id === projectFromUrl);
         if (exists) setOpenId(projectFromUrl);
-    }, [projectFromUrl, projects]);
+    }, [projects]);
 
-    // ✅ open drawer + update URL
-    const openProject = (id: string) => {
-        setOpenId(id);
-        const params = new URLSearchParams(searchParams.toString());
-        params.set("project", id);
-        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-    };
+    // ✅ Keep the URL in sync (client-only)
+    useEffect(() => {
+        const url = new URL(window.location.href);
 
-    // ✅ close drawer + remove URL param
-    const closeProject = () => {
-        setOpenId(null);
-        const params = new URLSearchParams(searchParams.toString());
-        params.delete("project");
-        const qs = params.toString();
-        router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-    };
+        if (openId) url.searchParams.set("project", openId);
+        else url.searchParams.delete("project");
+
+        window.history.replaceState({}, "", url.toString());
+    }, [openId]);
+
+    // ✅ Lock background scroll when drawer is open
+    useEffect(() => {
+        if (!active) return;
+        const prev = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = prev;
+        };
+    }, [active]);
+
+    // ✅ ESC to close
+    useEffect(() => {
+        if (!active) return;
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") setOpenId(null);
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [active]);
+
+    const openProject = (id: string) => setOpenId(id);
+    const closeProject = () => setOpenId(null);
 
     return (
         <div className="space-y-6">
@@ -241,6 +253,7 @@ export default function ProjectsPage() {
                                     <div className="text-lg font-semibold text-zinc-900 leading-snug">
                                         {p.title}
                                     </div>
+
                                     <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-zinc-600">
                                         <span>{p.date}</span>
                                         <span className="text-zinc-300">•</span>
@@ -268,7 +281,7 @@ export default function ProjectsPage() {
                 ))}
             </div>
 
-            {/* ✅ Right-side drawer (make sure it sits ABOVE your sticky nav) */}
+            {/* Right-side drawer */}
             <div
                 className={`fixed inset-0 z-9999 ${active ? "pointer-events-auto" : "pointer-events-none"
                     }`}
@@ -367,9 +380,18 @@ export default function ProjectsPage() {
                                 ) : null}
 
                                 <DrawerSection title="Context" bullets={active.sections.context} />
-                                <DrawerSection title="The Problem" bullets={active.sections.problem} />
-                                <DrawerSection title="My Strategy" bullets={active.sections.strategy} />
-                                <DrawerSection title="My Solution" bullets={active.sections.solution} />
+                                <DrawerSection
+                                    title="The Problem"
+                                    bullets={active.sections.problem}
+                                />
+                                <DrawerSection
+                                    title="My Strategy"
+                                    bullets={active.sections.strategy}
+                                />
+                                <DrawerSection
+                                    title="My Solution"
+                                    bullets={active.sections.solution}
+                                />
                                 <DrawerSection title="Results" bullets={active.sections.results} />
 
                                 <div className="mt-10">

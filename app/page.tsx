@@ -218,7 +218,7 @@ export default function HomePage() {
           <div className="flex justify-center md:justify-start">
             <div className="relative h-44 w-44 overflow-hidden rounded-full border border-zinc-200 bg-white">
               <Image
-                src="/portfolio/cathy.jpg"
+                src="/cathymu-portfolio/cathy.jpg"
                 alt="Cathy Mu"
                 fill
                 className="object-cover"

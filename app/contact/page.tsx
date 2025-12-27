@@ -90,7 +90,7 @@ export default function ContactPage() {
             <div className="flex justify-center pt-10">
                 <div className="relative h-64 w-64 overflow-hidden rounded-full border border-zinc-200 bg-white shadow-sm md:h-80 md:w-80">
                     <Image
-                        src="/portfolio/cathy.jpg"
+                        src="/cathymu-portfolio/cathy.jpg"
                         alt="Cathy Mu"
                         fill
                         className="object-cover"
