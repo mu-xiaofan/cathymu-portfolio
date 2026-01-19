@@ -12,7 +12,7 @@ type ContactCard = {
 const cards: ContactCard[] = [
     {
         number: "01",
-        title: "EMAIL",
+        title: "Email",
         value: "xiaofanmu0128@gmail.com",
         buttonLabel: "SEND",
         href: "mailto:xiaofanmu0128@gmail.com",
@@ -28,10 +28,10 @@ const cards: ContactCard[] = [
     },
     {
         number: "03",
-        title: "INSTAGRAM",
+        title: "GitHub",
         value: "@spicyhotchickenwing",
         buttonLabel: "FOLLOW",
-        href: "https://www.instagram.com/spicyhotchickenwing/",
+        href: "https://github.com/mu-xiaofan",
         external: true,
     },
 ];
